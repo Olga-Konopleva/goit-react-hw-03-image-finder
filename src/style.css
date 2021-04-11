@@ -180,6 +180,11 @@ img {
 /*
   * Стили компонента Buton (Load more)
   */
+.button_container {
+  margin-top: 15px;
+  text-align: center;
+}
+
 .Button {
   padding: 8px 16px;
   border-radius: 2px;

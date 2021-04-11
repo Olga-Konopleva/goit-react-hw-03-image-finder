@@ -2,7 +2,7 @@ import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 import Button from '../Button/Button';
 import Loader from 'react-loader-spinner';
 
-const ImageGallery = ({ gallery, onClick }) => {
+const ImageGallery = ({ gallery, onClick, loader, onShowModal }) => {
   return (
     <div className="container">
       <ul className="ImageGallery">
@@ -11,11 +11,16 @@ const ImageGallery = ({ gallery, onClick }) => {
             key={id}
             webformatURL={webformatURL}
             largeImageURL={largeImageURL}
+            onShowModal={onShowModal}
           />
         ))}
       </ul>
-      {gallery && <Button onClick={onClick} />}
-      <Loader type="ThreeDots" color="#303f9f" height={80} width={80} />
+      <div className="button_container">
+        {!loader && gallery.length > 0 && <Button onClick={onClick} />}
+        {loader && (
+          <Loader type="ThreeDots" color="#303f9f" height={80} width={80} />
+        )}
+      </div>
     </div>
   );
 };

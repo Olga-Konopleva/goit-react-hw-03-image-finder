@@ -1,53 +1,79 @@
 import { useState, useEffect } from 'react';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import Searchbar from './components/Searchbar/Searchbar';
-import axios from 'axios';
-
-const API_KEY = '20154627-553297d4fa4e2a9272bf54c5b';
+import Modal from './components/Modal/Modal';
+import imagesApi from './servises/images-api';
 
 function App() {
   const [gallery, setGallery] = useState([]);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-
-  console.log(page);
-  console.log(searchQuery);
-  console.log(gallery);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImageURL, setLargeImageURL] = useState('');
 
   useEffect(() => {
-    if (!searchQuery) return;
-    fetchQuery(searchQuery, page);
-  }, [searchQuery, page]);
+    if (searchQuery) {
+      fetchQuery();
+    }
+  }, [searchQuery]);
 
-  const onChangeQuery = searchQuery => {
-    setSearchQuery(searchQuery);
-    setPage(1);
-    setGallery([]);
+  const toggleModal = () => {
+    setShowModal(prev => !prev);
   };
 
-  const loadMoreImages = () => {
-    setPage(page + 1);
+  const addModalImage = ({ target }) => {
+    console.dir(target);
+    const { src } = target.dataset;
+    setLargeImageURL(src);
+    toggleModal();
   };
 
-  const fetchQuery = (searchQuery, page) => {
-    axios
-      .get(
-        `https://pixabay.com/api/?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`,
-      )
-      .then(({ data }) => {
-        if (data.hits.length === 0) {
+  const onChangeQuery = query => {
+    setSearchQuery(query);
+    if (query !== searchQuery) {
+      setPage(1);
+      setGallery([]);
+    }
+  };
+
+  const fetchQuery = () => {
+    const options = { searchQuery, page };
+    setIsLoading(true);
+    imagesApi
+      .fetchImages(options)
+      .then(hits => {
+        if (hits.length === 0) {
           return;
         } else {
-          setGallery(gallery => [...gallery, ...data.hits]);
+          setLargeImageURL(hits.largeImageURL);
+          setPage(prev => prev + 1);
+          setGallery(gallery => [...gallery, ...hits]);
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
   return (
     <>
       <div className="App">
         <Searchbar onSubmit={onChangeQuery} />
         {searchQuery && (
-          <ImageGallery gallery={gallery} onClick={loadMoreImages} />
+          <ImageGallery
+            gallery={gallery}
+            onClick={fetchQuery}
+            loader={isLoading}
+            onShowModal={addModalImage}
+          />
+        )}
+        {showModal && (
+          <Modal onClose={toggleModal}>
+            {' '}
+            <img src={largeImageURL} alt="image" />{' '}
+          </Modal>
         )}
       </div>
     </>

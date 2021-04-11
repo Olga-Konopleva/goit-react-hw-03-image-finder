@@ -1,7 +1,12 @@
-const ImageGalleryItem = ({ webformatURL, largeImageURL }) => {
+const ImageGalleryItem = ({ webformatURL, largeImageURL, onShowModal }) => {
   return (
-    <li className="ImageGalleryItem">
-      <img src={webformatURL} alt="" className="ImageGalleryItem-image" />
+    <li className="ImageGalleryItem" onClick={onShowModal}>
+      <img
+        src={webformatURL}
+        alt=""
+        className="ImageGalleryItem-image"
+        data-src={largeImageURL}
+      />
     </li>
   );
 };
